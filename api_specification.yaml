@@ -1,0 +1,371 @@
+openapi: 3.0.3
+info:
+  title: Schoolis - Gestão Escolar Open-Source
+  description: |-
+    Esta é a definição da API para comunicação com o Backend do Sistema Schoolis, um sistema para gerenciamento escolar Open Source que está sendo desenvolvida por mim para facilitar o acesso das escolas públicas a um sistema de gerenciamento escolar gratuito e de qualidade.
+  contact:
+    email: lineker.calseverini@gmail.com
+  license:
+    name: GPLv3
+    url: https://github.com/LinekerCalseverini/Schoolis/blob/main/LICENSE
+  version: 0.0.1
+tags:
+  - name: aluno
+    description: Informações do Aluno
+paths:
+  /aluno:
+    get:
+      tags:
+        - aluno
+      summary: Listar Alunos
+      description: Endpoint para listar alunos da escola
+      operationId: ListarAlunos
+      parameters:
+        - name: nome
+          in: query
+          description: Busca por nome do aluno
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Operação Válida
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                    format: int64
+                    example: 200
+                  message:
+                    type: string
+                    example: "Query successful"
+                  result:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Aluno'
+                  page:
+                    type: integer
+                    example: 1
+        '403':
+          description: Não Autorizado
+          content:
+            application/json:
+              schema:
+                      $ref: '#/components/schemas/errorUnauthorized'
+  /aluno/{rm}:
+    get:
+      tags:
+        - aluno
+      summary: Ficha Cadastral do Aluno
+      description: Busca a ficha cadastral de um aluno
+      operationId: FichaAluno
+      parameters:
+        - name: rm
+          in: path
+          description: RM do Aluno
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Operação Válida
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                    format: int64
+                    example: 200
+                  message:
+                    type: string
+                    example: "Query successful"
+                  result:
+                    $ref: '#/components/schemas/FichaCadastralAluno'
+        '403':
+          description: Não Autorizado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorUnauthorized'
+        '404':
+          description: Aluno não Encontrado
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                    example: 404
+                  message:
+                    type: string
+                    example: "Aluno Não Encontrado"
+  /aluno/cadastrar:
+    post:
+      tags:
+        - aluno
+      summary: Cadastrar um Novo Aluno
+      description: Cadastra um aluno que ainda não existe no sistema
+      operationId: CadastrarAluno
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CadastroAluno'
+      responses:
+        '200':
+          description: Aluno cadastrado
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                    example: 200
+                  message:
+                    type: string
+                    example: "Aluno cadastrado com Sucesso"
+                  result:
+                    type: object
+                    properties:
+                      rm:
+                        type: integer
+                        example: 3278
+        '400':
+          description: Aluno já existe no sistema com o mesmo RM, RA, CPF, RG ou Certidão de Nascimento.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                    example: 400
+                  message:
+                    type: string
+                    example: "Aluno com o mesmo RM já existe"
+        '403':
+          description: Operação não autorizada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorUnauthorized'
+  /aluno/atualizar/{rm}:
+    post:
+      tags:
+        - aluno
+      summary: Atualizar dados de um Aluno
+      description: Atualiza dados de um aluno com base em seu número de RM
+      operationId: AtualizarAluno
+      parameters:
+        - name: rm
+          description: rm do aluno
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CadastroAluno'
+      responses:
+        '200':
+          description: Atualizado com Sucesso
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                    example: 200
+                  message:
+                    type: string
+                    example: "Aluno atualizado com sucesso."
+                  result:
+                    type: object
+                    properties:
+                      rm:
+                        type: integer
+                        example: 3278
+        '403':
+          description: Operação não autorizada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorUnauthorized'
+        '404':
+          description: Aluno não Encontrado
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                    example: 404
+                  message:
+                    type: string
+                    example: "Aluno Não Encontrado"
+components:
+  schemas:
+    Aluno:
+      type: object
+      properties:
+        rm:
+          type: integer
+          example: 3278
+        nome:
+          type: string
+          example: "José da Silva Rocha"
+        ra:
+          type: string
+          example: "123456789-12"
+        rg:
+          type: string
+          example: "12.345.678-9"
+        cpf:
+          type: string
+          example: "123.456.789-12"
+        responsavel:
+          type: string
+          example: "Marlene Silva"
+    CadastroAluno:
+      type: object
+      properties:
+        rm:
+          type: integer
+          example: 3278
+        nome:
+          type: string
+          example: "José da Silva Rocha"
+        ra:
+          type: string
+          example: "123456789-12"
+        rg:
+          $ref: '#/components/schemas/RG'
+        cpf:
+          type: string
+          example: "123.456.789-12"
+        dataNasc:
+          type: string
+          format: date
+        certidaoNasc:
+          type: string
+          example: "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
+        responsavel:
+          type: integer
+          example: 378
+    Endereco:
+      type: object
+      properties:
+        Logradouro:
+          type: string
+          example: "Rua das Cruzes"
+        Numero:
+          type: string
+          example: "123A"
+        Complemento:
+          type: string
+          example: "Fundos"
+        Bairro:
+          type: string
+          example: "Jd. América"
+        Cidade:
+          type: string
+          example: "Mogi Mirim"
+        Estado:
+          type: string
+          example: "SP"
+        CEP:
+          type: string
+          example: "15489-332"
+    FichaCadastralAluno:
+      type: object
+      properties:
+        rm:
+          type: integer
+          example: 3278
+        nome:
+          type: string
+          example: "José da Silva Rocha"
+        ra:
+          type: string
+          example: "123456789-12"
+        rg:
+          $ref: '#/components/schemas/RG'
+        cpf:
+          type: string
+          example: "123.456.789-12"
+        dataNasc:
+          type: string
+          format: date
+        certidaoNasc:
+          type: string
+          example: "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
+        responsaveis:
+          type: array
+          items:
+            $ref: '#/components/schemas/Responsavel'
+    RG:
+      type: object
+      properties:
+        numero:
+          type: string
+          example: "12.345.678-9"
+        orgaoExpedidor:
+          type: string
+          example: "SSP/SP"
+        dataExpedicao:
+          type: string
+          format: date
+    Responsavel:
+      type: object
+      properties:
+        nome:
+          type: string
+          example: "Marlene Silva"
+        rg:
+          $ref: '#/components/schemas/RG'
+        cpf:
+          type: string
+          example: "123.456.789-12"
+        endereco:
+          $ref: '#/components/schemas/Endereco'
+        telefones:
+          type: array
+          items:
+            $ref: '#/components/schemas/Telefone'
+    Telefone:
+      type: object
+      properties:
+        DDD:
+          type: string
+          example: "61"
+        Telefone:
+          type: string
+          example: "998875524"
+        Tipo:
+          type: string
+          enum:
+            - Residencial
+            - Comercial
+            - Celular
+            - Extra
+    errorUnauthorized:
+      type: object
+      properties:
+        code:
+          type: integer
+          format: int64
+          example: 403
+        message:
+          type: string
+          example: "Unauthorized"
+      
