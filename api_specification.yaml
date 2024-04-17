@@ -12,6 +12,8 @@ info:
 tags:
   - name: aluno
     description: Informações do Aluno
+  - name: boletim
+    description: Dados de Boletim
 paths:
   /aluno:
     get:
@@ -164,7 +166,7 @@ paths:
       operationId: AtualizarAluno
       parameters:
         - name: rm
-          description: rm do aluno
+          description: RM do aluno
           in: path
           required: true
           schema:
@@ -194,6 +196,70 @@ paths:
                       rm:
                         type: integer
                         example: 3278
+        '403':
+          description: Operação não autorizada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorUnauthorized'
+        '404':
+          description: Aluno não Encontrado
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                    example: 404
+                  message:
+                    type: string
+                    example: "Aluno Não Encontrado"
+  /boletim:
+    get:
+      tags:
+        - boletim
+      summary: Endpoint para pegar informações de boletim
+      description: Com base no RA providenciado, busca um boletim na base de dados.
+      operationId: BuscarBoletim
+      parameters:
+        - name: ra
+          description: RA do Aluno
+          in: query
+          required: true
+          schema:
+            type: string
+            example: "123.456.789-12"
+        - name: ano
+          description: Ano de Ensino
+          in: query
+          schema:
+            type: integer
+            example: 7
+        - name: bimestre
+          description: Número do Bimestre
+          in: query
+          schema:
+            type: integer
+            example: 4
+      responses:
+        '200':
+          description: Boletim encontrado
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                    example: 200
+                  message:
+                    type: string
+                    example: "Boletins encontrados."
+                  result:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Boletim'
         '403':
           description: Operação não autorizada
           content:
@@ -358,6 +424,48 @@ components:
             - Comercial
             - Celular
             - Extra
+    Boletim:
+      type: object
+      properties:
+        Ensino:
+          type: string
+          enum:
+            - Fundamental
+            - Médio
+        Ano:
+          type: integer
+          example: 8
+        NumBimestre:
+          type: integer
+          example: 4
+        Aluno:
+          type: string
+          example: "José da Silva"
+        RM:
+          type: integer
+          example: 3278
+        RA:
+          type: string
+          example: "123.456.789-12"
+        AnoData:
+          type: integer
+          example: 2024
+        Disciplinas:
+          type: array
+          items:
+            $ref: '#/components/schemas/DisciplinaComNota'
+    DisciplinaComNota:
+      type: object
+      properties:
+        Nome:
+          type: string
+          example: "Português"
+        Nota:
+          type: string
+          example: "B"
+        Faltas:
+          type: integer
+          example: 4
     errorUnauthorized:
       type: object
       properties:
@@ -368,4 +476,3 @@ components:
         message:
           type: string
           example: "Unauthorized"
-      
